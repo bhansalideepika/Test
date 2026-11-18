@@ -1,6 +1,120 @@
-<!Doctype html>
-<html>
-  <body>
-    <h1>This is a sample html page</h1>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HTML Practical Test – Student Marks & Issues</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#5b6573;--bd:#e1e5ea;--ac:#2f5fd0;--g:#1f8a4c;--y:#b7791f;--r:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171b;--card:#1d2127;--tx:#e8ebef;--mu:#9aa5b3;--bd:#2d333b;--ac:#7aa2ff;--g:#4cc382;--y:#e0b04f;--r:#f0776a}}
+:root[data-theme="dark"]{--bg:#14171b;--card:#1d2127;--tx:#e8ebef;--mu:#9aa5b3;--bd:#2d333b;--ac:#7aa2ff;--g:#4cc382;--y:#e0b04f;--r:#f0776a}
+html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 14px 40px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mu);margin:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:22px}.stat span{color:var(--mu);font-size:12px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+input,select{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font:inherit}
+input{flex:1;min-width:180px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:10px}
+.hd{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.hd .n{flex:1}.hd .n small{color:var(--mu);display:block}
+.tot{font-weight:700;font-size:18px}.pill{padding:2px 9px;border-radius:99px;font-size:12px;border:1px solid currentColor;white-space:nowrap}
+.g{color:var(--g)}.y{color:var(--y)}.r{color:var(--r)}
+.body{display:none;border-top:1px solid var(--bd);padding:6px 14px 12px}.card.open .body{display:block}
+.q{padding:9px 0;border-bottom:1px dashed var(--bd)}.q:last-child{border:0}
+.q .t{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.q .m{color:var(--mu);font-size:12.5px}.q .i{margin-top:3px}
+.tbl{overflow-x:auto}
+</style></head><body><main>
+<h1>HTML Practical Test – Marks &amp; Issues</h1>
+<p class="sub">Q1 Table · Q2 Form · Q3 Semantic Homepage · Q4 ARIA. Each question is out of 30 (Correctness + Design + Code Quality). Design was 10/10 for everyone.</p>
+<div class="stats" id="stats"></div>
+<div class="bar">
+<input id="s" placeholder="Search name or UID…" aria-label="Search">
+<select id="o" aria-label="Sort"><option value="n">Sort: Name</option><option value="hi">Total: high → low</option><option value="lo">Total: low → high</option></select>
+<select id="f" aria-label="Question filter"><option value="0">All questions</option><option value="1">Q1 Table</option><option value="2">Q2 Form</option><option value="3">Q3 Homepage</option><option value="4">Q4 ARIA</option></select>
+</div>
+<div id="list"></div>
+</main>
+<script>
+const QN=["Q1 Product Comparison Table","Q2 Registration & Order Form","Q3 Semantic Shopping Homepage","Q4 ARIA & Accessibility"];
+// [name, uid, [ [correctness, codeQuality, issues] | null  ×4 ]]
+const S=[
+["Aditya Verma",466,[[2,3,"Only 1–2 records; no thead/tbody/tfoot/colgroup; orphan cells"],[2,2,"Incomplete; type='Full Name'; broken fieldsets"],[3,2,"No sidebar/footer/meta; <aricle> typo; unclosed tags"],[2,2,"Incomplete; unclosed tags; no ARIA"]]],
+["Abhishek Hiware",359,[[1,1,"Unclosed tags; missing 5 products, tbody, tfoot"],[3,2,"No textarea/datalist/radio; </headre>; nested forms; invalid types"],[1,2,"No nav/categories/sidebar/footer/SEO"],[1,1,"Incomplete; unclosed tags; no semantics"]]],
+["ADARSH",338,[[2,1,"No thead/tbody; col & caption outside table"],[1,1,"Incomplete; broken '<lab' tag"],[1,2,"Only a 'Hello' heading"],[1,1,"Random notes instead of markup"]]],
+["Anshu Swami",483,[[7,6,"No colgroup/col; <tfooter> typo; unclosed tbody"],[5,3,"No minlength/pattern; no datalist; radios not grouped; unclosed form"],[5,3,"No SEO tags/breadcrumb; header wraps main; id with #"],[0,2,"Blank HTML"]]],
+["Aryan Yadav",438,[[2,1,"Malformed tags/attrs; no colgroup; misused thead/tfoot"],[2,2,"Invalid types (fullname, tetx); most fields missing"],[2,1,"No footer/title/SEO; broken tags (<asiderticle>)"],[0,2,"Blank; only a heading"]]],
+["Chandra Sekhar Swain",453,[[8,7,"No colspan group heading; tfoot inside tbody"],[4,3,"No textarea/datalist; no minlength; radios lack name; duplicate ids"],[6,4,"No footer/keywords/breadcrumb; id='#Categories'; unclosed body/html"],[0,2,"Only a header"]]],
+["Deniyal Bunker",427,[[6,5,"No colgroup/col; tfoot outside table; body closed early; no scope"],[2,2,"Misspelled tags (fileset, lable); missing validation"],[1,1,"Almost all sections missing; no semantics/SEO"],[0,0,"Empty file"]]],
+["Dipanshu Yadav",479,[[3,2,"No thead/tbody/colgroup; <theader>; duplicate ids"],[1,1,"Cuts off mid-tag"],[2,2,"Missing header/footer/sidebar; <ol> used for <li>"],[0,2,"Boilerplate only"]]],
+["Divyanshu Jha",428,[[2,1,"No caption/thead/colgroup; <head> inside table; unclosed"],[1,1,"Almost no fields; invalid tags"],[1,1,"Body/title misplaced; missing sections"],[0,2,"Virtually empty"]]],
+["Gargi Baranwal",441,[[8,6,"Inline styles instead of col bgcolor; URF-8 typo; no tr in tfoot"],[4,3,"No textarea/datalist; same option values; duplicate ids; min/max misuse"],[6,4,"No meta desc/keywords/breadcrumb; aside inside main; unclosed tags; duplicate ids"],[0,2,"Placeholder only"]]],
+["Himanshu Kumar",497,[[8,6,"No colgroup/col; missing </table>; deprecated bgcolor"],[8,7,"Datalist left commented out; form closing issues"],[6,4,"No meta desc/keywords/breadcrumb/figure; malformed section tag"],[3,3,"div role=button; no search form; missing categories; no aria-current"]]],
+["Jiya Rajpoot",264,[[6,5,"No colgroup/col; no scope; caption outside table; span issues"],[3,3,"No textarea/datalist; buttons used as radios; broken patterns"],[2,2,"No header/main/footer; stray <li>"],null]],
+["Kaushal Dhaked",348,[[2,3,"Empty table; caption outside"],[3,2,"No dropdown/datalist; duplicate ids; no legend"],[3,2,"No header/footer/aside/title; unclosed tags"],[0,0,"Only comments"]]],
+["Lalit Choudhary",416,[[8,6,"No colgroup/col; <th> in tfoot; inline styles"],[6,5,"Duplicate ids; wrong radio labels; datalist not linked; broken attribute"],[6,5,"No title/meta/footer/breadcrumb; shoe image under a book article"],[0,3,"Only an <h1>"]]],
+["Manthan Bonde",387,[[7,6,"No colgroup bgcolor; <th> in tfoot without <tr>; no best-rated highlight"],[6,4,"No textarea/datalist/promo; radios not grouped; quote error"],[6,3,"charset 'VTF-8'; </heaader>; no aside/meta; duplicate ids"],[2,2,"Empty hrefs; unclosed anchors; no ARIA"]]],
+["mohit upadhyay",451,[[3,3,"No thead/tbody/tfoot/colgroup/spans/rating; caption outside"],[2,2,"Incomplete; <label=…>; type=name/telephone"],[2,2,"No sidebar/footer/SEO/products; corrupted DOCTYPE"],[0,2,"Boilerplate only"]]],
+["Ndhi Kumari",414,[[8,6,"No colgroup/col bgcolor; tfoot lacks colspan; scope on td"],[4,3,"Invalid <input='radio'>; type=textarea; duplicate ids; no datalist"],[3,2,"No main/aside/footer; unclosed <a>; file cuts off"],[1,1,"Unclosed tags; <labe for>; no category nav"]]],
+["Neev Rambhia",244,[[2,1,"No colgroup/tfoot; unclosed <th>; span errors"],[3,2,"No textarea/datalist; broken address input; bad phone regex"],[3,2,"No sidebar/footer/meta; unclosed tags; elements in head"],[0,1,"Parts A/B missing; unclosed div"]]],
+["Prakalp Dwivedi",459,[[8,6,"No colgroup/col; deprecated bgcolor; <th> for data cell"],[6,4,"<forms> typo; no textarea/datalist; labels not linked"],[4,3,"No Home link/meta/breadcrumb; footer inside main"],[5,4,"<blockquote> around button; no role=search/aria-describedby/aria-current"]]],
+["Pratishtha Keshri",343,[[9,7,"Inline style on col instead of bgcolor; malformed <col> tags"],[6,4,"Radios not grouped; missing id/name; mobile pattern; unclosed label"],[5,4,"No sidebar/keywords/breadcrumb; unclosed <h2>"],[3,3,"role=search on div; div role=button; alt 'click here'"]]],
+["Pushkar Shahi",467,[[3,3,"No caption/colgroup/spans; rating as separate table; <th> misuse"],[2,2,"Two forms; no textarea/select; buttons outside form"],[2,1,"<nav> per link; no footer/categories/products"],[3,2,"Misused empty <nav>; categories as text inputs"]]],
+["Rahul Od",440,[[1,1,"No <table>; orphan tbody/tr"],[5,3,"Input for address; text input in select; no datalist; <lebel>; wrong form closing"],[2,2,"Main inside header; most sections missing"],[1,1,"Incomplete; no body; no ARIA"]]],
+["Rahul Yadav",337,[[2,2,"No caption/colgroup/thead/tbody/tfoot; misplaced tags"],[2,1,"<lable>; no name attrs; no datalist"],[1,1,"Nearly empty; missing sections/SEO"],null]],
+["Rochna Sharma",336,[[3,2,"Broken markup; no colgroup/col; misplaced tfoot"],[4,3,"No textarea/datalist; duplicate ids; type=name"],[1,1,"Cut off; id='#main-content'; no footer/sidebar/SEO"],[1,1,"Incomplete; broken <span>"]]],
+["Sankalp Singh",437,[[6,5,"No colgroup; duplicate rating column; rowspan=\"2\"\""],[7,6,"No datalist; duplicate ids"],[6,3,"No meta desc/keywords; <img> in head; aside/figure inside <p>"],[3,3,"No aria-current/labels; div role=button; unclosed comment"]]],
+["Simran",410,[[7,8,"No colgroup/col; table not closed before script"],[7,6,"<field> tag; type=numeric; no datalist; radio names"],[6,4,"<pre> wrapping content; aside inside cards; no challenge"],[1,2,"No search form/categories; unclosed tags"]]],
+["Tanmay Gupta",478,[[6,5,"No colgroup/col; <th> outside <tr>; no tbody"],[4,3,"No textarea/select/datalist; duplicate ids; type='mail'"],[7,5,"Main inside header; unclosed <h5>; no breadcrumb/SEO"],[3,2,"Unclosed tags; no DOCTYPE; div role=button; no aria-current"]]],
+["Ujjal Kumar Singha",460,[[3,2,"No colgroup; <theader>; rows outside sections"],[2,2,"No <form>; ids with spaces; type=database; no terms/datalist"],[1,1,"No header/footer/aside; 'hrf' typos; nested <main>"],null]],
+["Vaibhav Singh Rao",454,[[3,3,"No thead/tbody/tfoot/colgroup/spans; caption outside; unclosed td"],[3,2,"Wrong input types; no textarea; unquoted attrs; weak validation"],null,null]],
+["Vivek Kumar",484,[[6,5,"colgroup inside thead; caption outside table; viewport typo; span mismatch"],[6,4,"No datalist; type='passowrd'; broken regex; unclosed form"],[6,3,"Viewport typo; incomplete title; <pre> for categories; <summary> without <details>"],[0,2,"Only a heading"]]],
+["Yashasvi Sarswat",487,[[8,6,"No colgroup/col; tfoot inside tbody; <td> used for headers"],[8,6,"No phone pattern; textarea missing id/name; no datalist"],[6,5,"<favicon> tag; figcaption outside figure; no breadcrumb"],[3,4,"No category nav; role=search on input; <p> in button; typo 'Serch'"]]]
+];
+const F={
+"466-0":["The student's submission is extremely incomplete. It fails to include the 5 product records, the &lt;thead&gt;, &lt;tbody&gt;, and &lt;tfoot&gt; sections, colgroup/col elements, rowspan for categories, and the footer total count.","The HTML markup is malformed and incomplete, featuring orphaned table cells and incorrect spanning logic. Proper semantic sections like &lt;thead&gt; and &lt;tbody&gt; are missing entirely.","Your submission is severely incomplete and stops after just starting the table structure. Please review all project requirements including the necessary table sections, semantic tags, colgroups, and at least 5 product records to complete the assignment."],
+"466-1":["The student's submission is incomplete, missing the vast majority of form fields, validation rules, and the challenge tasks.","The HTML contains severe syntax errors, such as unclosed tags, invalid input types (e.g., type='Full Name'), and broken fieldset nesting.","Your submission is incomplete and contains broken HTML syntax that prevents the form from functioning correctly. Please review the form requirements carefully, ensure all fields and validation attributes are properly implemented, and fix your HTML structure."],
+"466-2":["The student missed several core requirements, including the sidebar, footer content, meta tags for SEO, and the challenge task (breadcrumbs and figure/figcaption). The HTML structure is also severely incomplete.","The HTML contains severe syntax errors such as misspelled tags (&lt;aricle&gt;), unclosed tags, and missing closing elements for &lt;main&gt;, &lt;body&gt;, and &lt;html&gt;. Semantic markup is broken due to these unclosed and malformed structures.","Your submission is incomplete and contains critical HTML syntax errors like unclosed tags and misspellings (&lt;aricle&gt;). To improve, make sure to include all required sections like the sidebar and footer, add proper SEO meta tags, and carefully validate your HTML structure."],
+"466-3":["The student failed to implement almost all accessibility requirements, ARIA attributes, and search form specifications. The HTML code is severely incomplete and broken.","The HTML contains severe syntax errors, including unclosed tags and abrupt endings. Semantic elements and accessibility best practices were completely ignored.","Your submission is incomplete and contains critical syntax errors in the HTML file. Please review the project requirements regarding accessible forms, semantic navigation, and ARIA attributes to properly build out the interface."],
+"359-0":["The submission is incomplete, heavily maligned with syntax errors (unclosed tags, broken HTML), and missing nearly all required features such as 5 products, &lt;tbody&gt;, &lt;tfoot&gt;, and correct column structures.","The HTML contains numerous syntax errors, missing closing tags, mismatched table tags (e.g., mixing th and td inappropriately), and incomplete meta tags.","Your submission is incomplete and contains significant syntax and structural errors in the HTML. Please carefully review the project requirements, ensure all tags are properly closed, and implement all requested table sections, columns, and challenge tasks."],
+"359-1":["The student missed several specific requirements, such as using a textarea for the address, a datalist for product names, radio buttons for payment methods, and putting the entire form inside a single &lt;form&gt; tag with proper validation attributes.","The HTML contains numerous syntax and structural errors, including unclosed tags (&lt;meta&gt;), a typo in closing the header tag (&lt;/headre&gt;), multiple &lt;form&gt; elements nested inside fieldsets, mismatched 'for' and 'id' attributes on labels, and invalid input types (e.g., type='numberic', type='address', type='quantity').","Your submission contains significant structural and HTML syntax errors that prevent the form from functioning correctly and meeting the project specifications. Please review proper HTML5 form semantics, ensure all required input types and elements (like textarea and datalist) are used, and avoid nesting multiple forms and fieldsets incorrectly."],
+"359-2":["The submission fails to meet almost all requirements. It is missing the navigation menu, categories section, featured products, sidebar, footer, SEO meta tags, accessibility features, and the challenge task.","While basic semantic elements like header and main are present, the overall document is incomplete, missing the head section elements such as title, meta tags, and all required body content.","Your submission is incomplete and misses the vast majority of the core project requirements, including sections, SEO tags, and accessibility features. Please review the project specifications carefully and ensure all required elements and sections are fully implemented in your next attempt."],
+"359-3":["The submission fails to meet almost all requirements for the accessible search form, category navigation, and ARIA attributes, leaving the HTML incomplete and broken.","The code contains unclosed tags, lacks semantic elements, and is missing necessary attributes, resulting in poor structure and syntax issues.","Your submission is incomplete and missing most of the required accessibility features, semantic elements, and styling. Please carefully review the prompt specifications to ensure you include proper forms, labels, ARIA attributes, and category navigation links."],
+"338-0":["The student failed to use critical table structural elements like &lt;thead&gt;, &lt;tbody&gt;, and proper row/cell tags, resulting in a completely broken HTML table structure.","The HTML code contains severe syntax errors, missing closing tags, misplaced elements like &lt;col&gt; and &lt;caption&gt; outside the table, and invalid attribute usage.","Your submission contains critical HTML structure errors that prevent the table from rendering properly. Review proper HTML table creation, making sure to correctly nest &lt;thead&gt;, &lt;tbody&gt;, &lt;tr&gt;, &lt;th&gt;, and &lt;td&gt; elements, and keep &lt;colgroup&gt; inside the table."],
+"338-1":["The submission is incomplete, missing nearly all required form fields, validation attributes, and the challenge tasks.","The HTML markup contains severe syntax errors, unclosed tags, and fragmented elements like '&lt;lab'.","Your submission is incomplete and contains broken HTML syntax. You need to include all requested form fields, validation attributes, fieldsets, and challenge task requirements to pass this project."],
+"338-2":["The student failed to include almost all required sections, including the header, main content, sidebar, footer, categories, featured products, and SEO/accessibility requirements.","The HTML file is nearly empty, containing only a basic 'Hello' heading and missing all semantic structure required by the project specifications.","Your submission is incomplete and does not meet the core requirements of the project. Please carefully review the project specifications to include the required semantic sections, SEO elements, and the challenge task."],
+"338-3":["The student failed to implement almost all requirements for the accessible search form, navigation, ARIA attributes, and Part A/B specifications.","The submitted HTML is incomplete and broken, containing random fragment notes instead of the requested markup structure.","Your submission is missing the required implementation for both the accessibility corrections and the redesigned HTML interface. Please review the project specifications carefully to ensure all semantic HTML elements, ARIA attributes, and form requirements are fully coded."],
+"483-0":["The student met most requirements including table headers, colspan, rowspan, and the challenge task, but missed the requirement to use `&lt;colgroup&gt;` and `&lt;col&gt;` with the `bgcolor` attribute for Price and Availability, and misspelled `&lt;tfoot&gt;` as `&lt;tfooter&gt;` and Availability as `Avaliblity`.","While the semantic table structure is mostly correct, there are HTML structural bugs such as an unclosed `&lt;tbody&gt;` and an invalid `&lt;tfooter&gt;` tag name instead of `&lt;tfoot&gt;`.","You did a good job implementing the advanced table features like rowspan, colspan, and the challenge task for customer ratings. However, make sure to double-check spelling, strictly follow column grouping instructions with `&lt;colgroup&gt;`, and close your HTML tags properly to ensure valid markup."],
+"483-1":["The form includes many required elements like fieldsets, inputs, and the challenge tasks, but misses key requirements such as minimum/maximum length constraints on the name, pattern/type validation for the mobile number (using maxlength instead of pattern or a 10-digit check), the required datalist for product names, and correct radio button group naming for payment methods.","There are several HTML structure issues, including unclosed form tags, nesting a fieldset improperly inside another fieldset incorrectly, and overlapping/invalid IDs and 'for' attributes containing spaces. Additionally, the submit and reset buttons are not properly typed using `type=\"submit\"` and `type=\"reset\"`.","You've made a good start on creating the form structure and incorporating the challenge tasks. To improve, pay closer attention to specific validation attributes (like minlength and pattern), use semantic datalists instead of standard text inputs for product suggestions, fix your HTML nesting and ID naming conventions, and use CSS for spacing instead of multiple break tags."],
+"483-2":["The student implemented many basic sections like the header, categories, and footer, but missed several key requirements including SEO tags, the Challenge task breadcrumbs, and exact prices for featured products.","The HTML document has severe syntax issues, including unclosed tags (like the header section wrapping the entire main element), missing DOCTYPE html attributes, and invalid ID selectors containing hashes.","You have made a good start by including basic structural elements like the header, main content sections, and footer. However, you need to pay close attention to closing your HTML tags properly, include the required SEO meta tags, and complete the challenge task to achieve a passing grade."],
+"483-3":["The student completely failed to implement the required product search and category navigation interface, leaving the HTML file essentially blank.","The base HTML structure is present and links the script and stylesheet correctly, but lacks all the required markup and accessibility features requested in the prompt.","Your submission is missing all the required code for the ShopSmart product search and category navigation interface. Please ensure you complete both Part A and Part B according to the specifications in the future."]
+};
+const tot=(q)=>q?q[0]+10+q[1]:0, cls=(p)=>p>=.7?'g':p>=.45?'y':'r';
+S.forEach(s=>{s.t=0;s.a=0;s[2].forEach(q=>{if(q){s.t+=tot(q);s.a++}})});
+const sum=(a)=>a.reduce((x,y)=>x+y,0);
+document.getElementById('stats').innerHTML=[
+ [S.length,'students'],[(sum(S.map(s=>s.t))/sum(S.map(s=>s.a))).toFixed(1)+'/30','avg per question'],
+ [Math.max(...S.flatMap(s=>s[2].filter(Boolean).map(tot))),'highest single score'],
+ [S.filter(s=>s.a<4).length,'with missing submissions']
+].map(x=>`<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('');
+const L=document.getElementById('list');
+function render(){
+ const k=document.getElementById('s').value.toLowerCase(),o=document.getElementById('o').value,f=+document.getElementById('f').value;
+ let a=S.filter(s=>(s[0].toLowerCase().includes(k)||String(s[1]).includes(k)));
+ a.sort((x,y)=>o=='hi'?y.t/ (y.a||1)-x.t/(x.a||1):o=='lo'?x.t/(x.a||1)-y.t/(y.a||1):x[0].localeCompare(y[0]));
+ L.innerHTML=a.map(s=>{
+  const p=s.t/(s.a*30);
+  const rows=s[2].map((q,i)=>{
+   if(f&&f!=i+1)return'';
+   if(!q)return`<div class="q"><div class="t"><span>${QN[i]}</span><span class="r">Not submitted</span></div></div>`;
+   const t=tot(q);
+   return`<div class="q"><div class="t"><span>${QN[i]}</span><span class="${cls(t/30)}">${t}/30</span></div><div class="m">Correctness ${q[0]}/10 · Design 10/10 · Code quality ${q[1]}/10</div>${(d=>d?`<div class="i"><b>Correctness feedback:</b> ${d[0]}</div><div class="i"><b>Code quality feedback:</b> ${d[1]}</div><div class="i"><b>Overall summary:</b> ${d[2]}</div>`:`<div class="i">${q[2]}</div>`)(F[s[1]+'-'+i])}</div>`}).join('');
+  return`<div class="card"><div class="hd" tabindex="0" role="button"><div class="n"><b>${s[0]}</b><small>UID ${s[1]} · ${s.a}/4 submitted</small></div><span class="pill ${cls(p)}">${(p*100).toFixed(0)}%</span><span class="tot ${cls(p)}">${s.t}/${s.a*30}</span></div><div class="body">${rows}</div></div>`}).join('')||'<p class="sub">No matches.</p>';
+}
+L.addEventListener('click',e=>{const h=e.target.closest('.hd');if(h)h.parentNode.classList.toggle('open')});
+L.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('hd'))e.target.click()});
+['s','o','f'].forEach(i=>document.getElementById(i).addEventListener('input',render));
+render();
+</script></body></html>
